@@ -16,6 +16,7 @@ import winreg
 from windows_toasts import InteractableWindowsToaster, Toast, ToastActivatedEventArgs, ToastButton
 from aiomqtt import Client, Message, MqttError
 import win32clipboard
+import win32api
 import os
 
 LOGGER = logging.getLogger("sms_repeater.client")
@@ -130,6 +131,10 @@ async def listen_loop(config) -> None:
     port = mqtt_config.getint('port', 1883)
     username = os.environ.get('MQTT_USERNAME')
     password = os.environ.get('MQTT_PASSWORD')
+    
+    if not username or not password:
+        win32api.MessageBox(0, "无法从环境变量获取MQTT用户名或密码，请设置MQTT_USERNAME和MQTT_PASSWORD环境变量", "警告", 0x00000030)
+    
     client_id = mqtt_config.get('client_id', None)
     keepalive = mqtt_config.getint('keepalive', 60)
     qos = mqtt_config.getint('qos', 1)
