@@ -1,9 +1,13 @@
 # SMS-repeater
 
+## 环境配置
+
+```bash
 conda create -n sms-repeater python=3.13
 conda activate sms-repeater
 
 pip install -r requirements.txt
+```
 
 ## MQTT 服务器
 
@@ -17,25 +21,24 @@ pip install -r requirements.txt
 
 ### 系统消息监听客户端
 
-项目提供了基于 `aiomqtt` 的异步客户端 [`mqtt_client.py`](file://c%3A/workspace/github/SMS-repeater/mqtt_client.py)，用于订阅 `$SYS/#` 等主题并输出服务器当前状态消息。
+项目提供了基于 `aiomqtt` 的异步客户端 [`mqtt_client.py`](file://c%3A/workspace/github/SMS-repeater/mqtt_client.py)，用于订阅短信主题并处理短信消息。
 
 快速使用：
 
 ```pwsh
 $env:MQTT_USERNAME="user"
 $env:MQTT_PASSWORD="password"
-python mqtt_client.py --topic '$SYS/#'
+python mqtt_client.py
 ```
 
 > ℹ️ 在 Windows 上脚本会自动切换到 `WindowsSelectorEventLoopPolicy`，以兼容 aiomqtt 对底层 `add_reader`/`add_writer` 的调用。
 
+客户端配置存储在 [`mqtt_client.cfg`](file://c%3A/workspace/github/SMS-repeater/mqtt_client.cfg) 文件中，可以配置MQTT服务器地址、端口、订阅主题等参数。
+
 常用参数：
 
-- `--host` / `--port`：指定服务器地址（默认 `127.0.0.1:1883`）。
-- `-t/--topic`：可多次指定或使用逗号分隔多个主题，默认监听 `$SYS/#`。
-- `--reconnect-delay`：设置重连间隔，传入 `0` 或负数可禁用自动重连。
-- `--raw-payload`：以十六进制输出负载，便于调试非文本数据。
 - Windows 平台上，客户端会为每条消息触发系统通知（依赖 `windows-toasts` 包）；如未安装将提示补装。
+- 客户端会自动从短信内容中提取验证码，并提供一键复制到剪贴板功能。
 
 ### 密码生成工具
 
@@ -55,3 +58,10 @@ username:hash
 ```
 
 注意：生成的密码哈希采用 `sha512_crypt` 算法，与 amqtt 默认的 passlib 检验兼容。
+
+
+### nuitka 编译
+
+```bash
+nuitka --standalone --onefile mqtt_client.py
+```

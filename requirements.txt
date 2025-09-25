@@ -2,3 +2,5 @@ aiomqtt
 amqtt
 passlib
 windows-toasts
+pywin32
+nuitka
