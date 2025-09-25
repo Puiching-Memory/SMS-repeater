@@ -63,5 +63,6 @@ username:hash
 ### nuitka 编译
 
 ```bash
-nuitka --standalone --onefile mqtt_client.py
+nuitka --standalone --onefile --include-module=winrt.windows.foundation --include-module=winrt.windows.foundation.collections mqtt_client.py
+nuitka --windows-console-mode=disable --standalone --onefile --include-module=winrt.windows.foundation --include-module=winrt.windows.foundation.collections mqtt_client.py
 ```

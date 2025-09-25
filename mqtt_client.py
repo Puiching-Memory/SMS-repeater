@@ -87,11 +87,36 @@ def extract_verification_code(message_lines):
     Returns:
         str: 提取到的验证码，如果未找到则返回None
     """
+    # 定义多种验证码匹配模式
+    patterns = [
+        r'验证码[为是:]?\s*(\d{4,8})',  # 匹配 "验证码为：1234" 或 "验证码是: 5678" 等
+        r'驗證碼[為是:]?\s*(\d{4,8})',  # 繁体版本
+        r'code\s*[:：]?\s*(\d{4,8})',   # 匹配 "code:1234" 或 "code： 5678"
+        r'Code\s*[:：]?\s*(\d{4,8})',   # 匹配 "Code:1234"
+        r'codeis\s*(\d{4,8})',          # 匹配 "codeis1234"
+        r'驗證碼為\s*(\d{4,8})',         # 繁体版本
+        r'确认码[为是:]?\s*(\d{4,8})',   # 匹配 "确认码为：1234"
+        r'校验码[为是:]?\s*(\d{4,8})',   # 匹配 "校验码为：1234"
+        r'动态码[为是:]?\s*(\d{4,8})',   # 匹配 "动态码为：1234"
+        r'安全码[为是:]?\s*(\d{4,8})',   # 匹配 "安全码为：1234"
+        r'(\d{4,8})\s*\(?\s*[动驗驗]\s*[码證碼]\s*\)?',  # 匹配 "1234(验证码)" 或 "5678 验证码"
+        r'(?<!\d)(\d{4,8})(?!\d)[\s\S]*[动驗驗][码證碼]',  # 匹配 "1234 验证码"
+    ]
+    
     # 遍历每一行寻找包含验证码的部分
     for line in message_lines:
-        # 使用正则表达式匹配"验证码为：数字"的模式
-        match = re.search(r'验证码[为是]：(\d+)', line)
+        # 遍历所有模式进行匹配
+        for pattern in patterns:
+            match = re.search(pattern, line)
+            if match:
+                return match.group(1)
+    
+    # 如果常规模式未匹配，尝试查找任何4-8位数字
+    for line in message_lines:
+        # 查找单独出现的4-8位数字（前后不是数字）
+        match = re.search(r'(?<!\d)(\d{4,8})(?!\d)', line)
         if match:
+            # 如果数字不在常见词汇中，则可能是验证码
             return match.group(1)
     
     return None
