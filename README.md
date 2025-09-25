@@ -1,5 +1,7 @@
 # SMS-repeater
 
+![项目宣传图](assets/title.jpeg)
+
 ## 环境配置
 
 ```bash
