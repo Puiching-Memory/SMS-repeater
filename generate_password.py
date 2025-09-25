@@ -2,40 +2,18 @@
 """
 MQTT密码哈希生成工具
 
-该工具用于生成适用于amqtt密码文件的SHA-256哈希密码。
+该工具通过 passlib 生成符合 amqtt `FileAuthPlugin` 要求的 `sha512_crypt` 哈希。
 """
 
 import getpass
 import sys
-import hashlib
-import secrets
+
+from passlib.hash import sha512_crypt
 
 
-def generate_salt(length=16):
-    """生成随机盐值"""
-    return secrets.token_hex(length)
-
-
-def hash_password_sha256(password, salt=None):
-    """
-    使用SHA-256算法哈希密码
-    
-    Args:
-        password (str): 明文密码
-        salt (str): 盐值，默认为None时自动生成
-        
-    Returns:
-        str: 格式化的哈希密码字符串
-    """
-    if salt is None:
-        salt = generate_salt()
-    
-    # 使用hashlib生成SHA-256哈希
-    salted_password = password + salt
-    hashed = hashlib.sha256(salted_password.encode('utf-8')).hexdigest()
-    
-    # 返回格式化的字符串，模拟crypt输出格式
-    return f"$6${salt}${hashed}"
+def hash_password(password: str) -> str:
+    """使用 passlib 生成 sha512_crypt 哈希。"""
+    return sha512_crypt.hash(password)
 
 
 def main():
@@ -61,9 +39,8 @@ def main():
         print("错误: 两次输入的密码不一致")
         sys.exit(1)
     
-    # 生成盐值和哈希
-    salt = generate_salt()
-    hashed_password = hash_password_sha256(password, salt)
+    # 生成 sha512_crypt 哈希
+    hashed_password = hash_password(password)
     
     # 输出结果
     print("\n生成完成!")

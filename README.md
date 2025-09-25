@@ -11,7 +11,9 @@ pip install -r requirements.txt
 
 ### 认证信息
 
-服务器启用了用户认证，不允许匿名连接。
+服务器启用了用户认证，不允许匿名连接。密码文件使用 `sha512_crypt` 哈希，生成方式见下文。
+
+> ⚠️ 客户端需使用 MQTT 3.1.1 或更新协议版本（如 MQTT 5.0）。旧版协议名称 `MQIsdp` 会被拒绝。
 
 ### 密码生成工具
 
@@ -30,4 +32,4 @@ python generate_password.py
 username:hash
 ```
 
-注意：生成的密码哈希采用 SHA-256 算法，格式为 `$6$salt$hash`，其中 `$6$` 表示 SHA-256 算法。
+注意：生成的密码哈希采用 `sha512_crypt` 算法，与 amqtt 默认的 passlib 检验兼容。
