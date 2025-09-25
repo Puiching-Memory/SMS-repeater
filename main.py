@@ -1,8 +1,11 @@
 import asyncio
-import os
+from pathlib import Path
 from amqtt.broker import Broker
 
 # MQTT broker配置
+BASE_DIR = Path(__file__).resolve().parent
+PASSWORD_FILE = BASE_DIR / "passwd"
+
 config = {
     'listeners': {
         'default': {
@@ -10,29 +13,41 @@ config = {
             'bind': '0.0.0.0:1883',
         }
     },
-    'sys_interval': 10,
-    'auth': {
-        'allow-anonymous': True,
-    },
-    'topic-check': {
-        'enabled': True,
-        'plugins': ['topic_taboo'],
+    'plugins': {
+        'amqtt.plugins.sys.broker.BrokerSysPlugin': {
+            'sys_interval': 10,
+        },
+        'amqtt.plugins.authentication.FileAuthPlugin': {
+            'password_file': str(PASSWORD_FILE),
+        },
+        'amqtt.plugins.authentication.AnonymousAuthPlugin': {
+            'allow_anonymous': False,
+        },
+        'amqtt.plugins.topic_checking.TopicTabooPlugin': {},
     }
 }
 
-# 创建Broker实例
-broker = Broker(config)
+def build_broker(loop=None):
+    """构建 Broker 实例，允许注入事件循环以便测试。"""
+    return Broker(config, loop=loop)
 
-async def broker_coro():
-    await broker.start()
 
 async def main():
-    # 启动MQTT broker
-    await broker_coro()
-    
-    # 保持broker运行
-    while True:
-        await asyncio.sleep(1)
+    loop = asyncio.get_running_loop()
+    broker = build_broker(loop=loop)
+
+    await broker.start()
+    stay_running = asyncio.Future()
+
+    try:
+        await stay_running
+    except asyncio.CancelledError:
+        pass
+    finally:
+        await broker.shutdown()
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        pass
