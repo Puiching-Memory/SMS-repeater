@@ -1,2 +1,4 @@
+aiomqtt
 amqtt
 passlib
+windows-toasts

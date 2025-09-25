@@ -15,6 +15,28 @@ pip install -r requirements.txt
 
 > ⚠️ 客户端需使用 MQTT 3.1.1 或更新协议版本（如 MQTT 5.0）。旧版协议名称 `MQIsdp` 会被拒绝。
 
+### 系统消息监听客户端
+
+项目提供了基于 `aiomqtt` 的异步客户端 [`mqtt_client.py`](file://c%3A/workspace/github/SMS-repeater/mqtt_client.py)，用于订阅 `$SYS/#` 等主题并输出服务器当前状态消息。
+
+快速使用：
+
+```pwsh
+$env:MQTT_USERNAME="user"
+$env:MQTT_PASSWORD="password"
+python mqtt_client.py --topic '$SYS/#'
+```
+
+> ℹ️ 在 Windows 上脚本会自动切换到 `WindowsSelectorEventLoopPolicy`，以兼容 aiomqtt 对底层 `add_reader`/`add_writer` 的调用。
+
+常用参数：
+
+- `--host` / `--port`：指定服务器地址（默认 `127.0.0.1:1883`）。
+- `-t/--topic`：可多次指定或使用逗号分隔多个主题，默认监听 `$SYS/#`。
+- `--reconnect-delay`：设置重连间隔，传入 `0` 或负数可禁用自动重连。
+- `--raw-payload`：以十六进制输出负载，便于调试非文本数据。
+- Windows 平台上，客户端会为每条消息触发系统通知（依赖 `windows-toasts` 包）；如未安装将提示补装。
+
 ### 密码生成工具
 
 项目包含一个密码生成工具 [generate_password.py](file://c%3A/workspace/github/SMS-repeater/generate_password.py)，可以用来生成新的用户密码哈希。
